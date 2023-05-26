@@ -3,6 +3,10 @@ from config import engine, session, sg
 
 
 headers = ['ID', 'Task Name', 'Start Date', 'Finish Date', 'Status']
+def update_table_data():
+    tasks = session.query(Task).all()
+    data = [[task.id, task.task_name, task.start_date, task.date_to_finish, task.status] for task in tasks]
+    return data
 
 tasks = session.query(Task).all()
 
@@ -23,8 +27,14 @@ while True:
     if event == 'Exit' or event == sg.WINDOW_CLOSED:
         break
     elif event == 'Delete Task':
-        selected_task_id  = ['-TABLE-']
-        selected_task = session.query(Task).get(selected_task_id)
-        if selected_task:
-            session.delete(selected_task)
-            session.commit()
+        selected_row = values['-TABLE-']
+        if selected_row:
+            selected_task_id = selected_row[0]
+            selected_task = session.query(Task).get(selected_task_id)
+            if selected_task:
+                session.delete(selected_task)
+                session.commit()
+                data = update_table_data()
+                window['-TABLE-'].update(values=data)
+
+window.close()
